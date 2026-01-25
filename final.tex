@@ -1,0 +1,200 @@
+\documentclass[10pt]{beamer}
+
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{mathrsfs,bm,color}
+\usepackage{bbm}
+\usepackage{xparse}
+\usepackage{empheq}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{matrix, fit, backgrounds, positioning}
+
+\usetheme[progressbar=frametitle]{metropolis}
+\usepackage{appendixnumberbeamer}
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage{thmtools}
+
+% Theorem environments
+\declaretheorem[name=Theorem,thmbox=S]{theo}
+\declaretheorem[name=Definition,thmbox=M]{defn}
+\declaretheorem[name=Corollary,thmbox=S]{cor}
+\declaretheorem[name=Conjecture,thmbox=S]{con}
+
+\title{The Shannon Switching and $n$-Cop Games}
+\subtitle{Based on the work of Kimberly Wood (2012)}
+\date{\today}
+\author{Philip Umeadi}
+\institute{Syracuse University}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Introduction}
+    \begin{itemize}
+        \item \textbf{Network Resilience:} How many backup routes does a power grid or communication network need to survive a coordinated attack?
+        \item \textbf{Historical Context:} 
+        \begin{itemize}
+            \item Created by Claude Shannon (1951) to model electrical circuits.
+            \item Generalized to matroids and solved by Alfred Lehman (1964).
+        \end{itemize}
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.4\linewidth]{C.E._Shannon._Tekniska_museet_43069_(cropped).jpg}
+        \caption{Claude Shannon}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{The Playing Field}
+    Imagine a map of cities (points) and roads (lines).
+    \vfill
+    \begin{columns}
+        \column{0.5\textwidth}
+        \begin{itemize}
+            \item \textbf{Start and End:} We pick two special cities, $u$ and $v$.
+            \item \textbf{The Connection:} The whole game is about whether a traveler can get from $u$ to $v$.
+            \item \textbf{Complete Networks ($K_m$):} A map where \textit{every} city has a direct road to every other city.
+        \end{itemize}
+        \column{.33\textwidth}
+        \begin{figure}
+            \includegraphics[width=0.9\linewidth]{Complete_graph_K3.svg.png}
+            \caption{$K_3$}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Rules of the Game}
+    The Shannon Switching Game is a 1-on-1 strategy game:
+    \vfill
+    \begin{itemize}
+        \item \textbf{The Robber:} Wants to build a path between $u$ and $v$. They "claim" one road per turn.
+        \item \textbf{The Cop:} Wants to block the robber. They "delete" one road per turn from the map forever.
+    \end{itemize}
+    \vfill
+    \textbf{Outcome:} The Robber wins if they complete a path. The Cop wins if $u$ and $v$ are permanently disconnected.
+\end{frame}
+
+\begin{frame}{Example on $K_4$}
+\begin{center}
+        \includegraphics[width=1\linewidth]{fig2example.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Who Wins?}
+    Look at these three different graph structures. Can you identify which one favors the Cop and which favors the Robber?
+    \vfill
+    \begin{columns}[t]
+        \column{.33\textwidth}
+        \centering \includegraphics[width=0.9\textwidth]{posgraph.png} \\ \textbf{Graph A}
+        \column{.33\textwidth}
+        \centering \includegraphics[width=0.9\textwidth]{neutralgraph.png} \\ \textbf{Graph B}
+        \column{.33\textwidth}
+        \centering \includegraphics[width=0.9\textwidth]{neggraph.png} \\ \textbf{Graph C}
+    \end{columns}
+    \vfill
+\end{frame}
+
+\begin{frame}[fragile]{Categorizing Game States}
+    Before calculating results, we classify how 'safe' a graph is:
+    \vfill
+    \begin{columns}[t]
+        \column{.33\textwidth}
+        \centering \textbf{Positive} \\ \includegraphics[width=0.9\textwidth]{posgraph.png} \\
+        \scriptsize Robber wins regardless of who starts. \\ 
+        \textit{Property:} High redundancy (two disjoint spanning trees).
+        
+        \column{.33\textwidth}
+        \centering \textbf{Neutral} \\ \includegraphics[width=0.9\textwidth]{neutralgraph.png} \\
+        \scriptsize Winner is determined by who moves first.
+        
+        \column{.33\textwidth}
+        \centering \textbf{Negative} \\ \includegraphics[width=0.9\textwidth]{neggraph.png} \\
+        \scriptsize Cop wins regardless of who starts. \\
+        \textit{Property:} Contains "bottlenecks."
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Formalizing the Game}
+    We define the game as $(G, u, v)$, where $G = (V, E)$.
+    \vfill
+    \begin{defn}[Recursive Win Conditions]
+        \begin{itemize}
+            \item \textbf{Base Case:} If $u=v$, the game is \textbf{positive}.
+            \item \textbf{Non-Negative:} If there exists an edge $e$ such that \textit{contracting} it (merging its two endpoints) creates a positive game.
+            \item \textbf{Positive:} If for \textbf{any} $n$ edges the cop deletes, the remaining graph is still a non-negative game.
+        \end{itemize}
+    \end{defn}
+    \vfill
+    \text If the Cop gets $n$ moves, the graph must be dense enough to survive any $n$ deletions.
+\end{frame}
+
+\begin{frame}{The $n$-Cop Game}
+    \textbf{The Question:} 
+    In a complete network $K_m$, how many cities ($m$) are required to guarantee a Robber win against a Cop who deletes $n$ roads per turn?
+    \vfill
+    This "threshold" size is our function:
+    \[ \phi(n) = \min\{m \mid K_m \text{ is a positive game against } n \text{ cops}\} \]
+\end{frame}
+
+\begin{frame}{Main Result: Bounds on $\phi(n)$}
+    Kimberly Wood proved that the "tipping point" size falls in this range:
+    \vfill
+    \begin{theo}[Wood, 2012]
+    For $n \ge 1$ cops:
+    \[ n+4 \le \phi(n) \le 2n^2 + n + 1 \]
+    \end{theo}
+    \vfill
+    \begin{itemize}
+        \item \textbf{Implication:} We now have a guaranteed "safety limit" for complete networks.
+        \item \textbf{The Gap:} As $n$ grows, the upper bound grows quadratically, while the lower bound is linear.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Lower Bound: Why $K_{n+3}$ is Not Enough}
+    \textbf{Result:} $\phi(n) > n+3$
+    \vfill
+    \textbf{The Cop's Isolation Strategy:}
+    \begin{itemize}
+        \item \textbf{Turn 1:} Cop deletes the direct road $(u, v)$.
+        \item \textbf{Starvation:} With $n$ deletions per turn, the Cop can systematically delete roads connected to whichever city the Robber moves to.
+        \item \textbf{Outcome:} In a graph this small, the Robber runs out of "neighboring cities" before they can reach the target $v$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Upper Bound: Why $K_{2n^2+n+1}$ is Guaranteed}
+    \textbf{Result:} $\phi(n) \le 2n^2+n+1$
+    \vfill
+    \textbf{The Vertex Counting Argument:}
+    \begin{itemize}
+        \item \textbf{Robber's Greedy Strategy:} Always move to a new, "unspoiled" city.
+        \item \textbf{The Math of Plenty:} Each turn, the Cop only "spoils" $n$ cities. Even after $n$ turns, the sheer number of vertices ($2n^2+n+1$) ensures the Robber still has safe paths.
+        \item \textbf{Turn $n+2$:} By this turn, the Robber is mathematically guaranteed to find a path through the remaining unblocked cities.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Refining the Result}
+    \begin{center}
+    \begin{tabular}{c|c|c}
+        $n$ (Cops) & Lower Bound ($n+4$) & Upper Bound ($2n^2+n+1$) \\ \hline
+        1 & 5* & 4 \\
+        2 & 6 & 11 \\
+        3 & 7 & 22 \\
+    \end{tabular}
+    \end{center}
+    \scriptsize *Note: For $n=1$, the actual value is 4.
+    \vfill
+    \begin{con}
+        Wood conjectures $\phi(2) \leq 9$ and $\phi(3) \leq 14$. \\
+        My observation: For $n=2$, the threshold appears to be exactly $\phi(2)=7$.
+    \end{con}
+    \vfill
+    \begin{itemize}
+        \item This suggests $\phi(n)$ might be linear, meaning networks are even more resilient than the upper bound suggests.
+        \item Can the properties of the Shannon Switching Game be generalized to the $n$-Cop game?
+        \item Further research involves studying the game on complete bipartite graphs $K_{m,m}$.
+    \end{itemize}
+\end{frame}
+
+\end{document}
